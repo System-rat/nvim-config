@@ -12,16 +12,21 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Configure tree-sitter for it to work
-require('nvim-treesitter.configs').setup {
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-}
 
 -- Plugins
 require("lazy").setup({
+  {
+   "nvim-treesitter/nvim-treesitter",
+    config = function()
+       -- Configure tree-sitter for it to work
+       require('nvim-treesitter.configs').setup {
+         highlight = {
+           enable = true,
+           additional_vim_regex_highlighting = false,
+         },
+       }
+    end
+  },
   {
     "dense-analysis/ale",
     config = function()
@@ -76,6 +81,9 @@ require("lazy").setup({
         }
       }
     end
+  },
+  {
+    "rbgrouleff/bclose.vim"
   },
   {
     "francoiscabrol/ranger.vim",
