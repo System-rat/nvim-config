@@ -8,7 +8,7 @@ Requires Neovim with tree-sitter support.
 Just use the latest `neovim` idk.
 
 ```sh
-git clone https://github.com/System-rat/nvim-cnfig ~/.config/nvim
+git clone https://github.com/System-rat/nvim-config ~/.config/nvim
 ```
 
 # License
