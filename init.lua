@@ -16,16 +16,18 @@ vim.opt.rtp:prepend(lazypath)
 -- Plugins
 require("lazy").setup({
   {
-   "nvim-treesitter/nvim-treesitter",
-    config = function()
-       -- Configure tree-sitter for it to work
-       require('nvim-treesitter.configs').setup {
-         highlight = {
-           enable = true,
-           additional_vim_regex_highlighting = false,
-         },
-       }
-    end
+    "nvim-treesitter/nvim-treesitter",
+    priority = 1001,
+      config = function()
+         -- Configure tree-sitter for it to work
+         require('nvim-treesitter.configs').setup {
+          auto_install = true,
+           highlight = {
+             enable = true,
+             additional_vim_regex_highlighting = false,
+           },
+         }
+      end
   },
   {
     "dense-analysis/ale",
@@ -54,11 +56,15 @@ require("lazy").setup({
       }
     end
   },
+  -- Needed for neorg
+  {
+    "vhyrro/luarocks.nvim",
+    priority = 1000,
+    config = true,
+  },
   {
     "nvim-neorg/neorg",
-    build = ":Neorg sync-parsers",
-    lazy = false,
-    dependencies = { "nvim-lua/plenary.nvim" },
+    dependencies = { "luarocks.nvim" },
     config = function()
       require('neorg').setup {
         load = {
@@ -87,14 +93,22 @@ require("lazy").setup({
   },
   {
     "francoiscabrol/ranger.vim",
-    lazy = false,
     config = function()
       local g = vim.g
       g.ranger_replace_netrw = 1
       g.ranger_map_keys = 0
     end
   },
-	"EdenEast/nightfox.nvim"
+  {
+    "EdenEast/nightfox.nvim"
+  },
+  {
+    "ggandor/leap.nvim",
+    config = function()
+      require('leap').create_default_mappings()
+    end,
+    dependencies = { "tpope/vim-repeat" }
+  }
 })
 
 -- Source the vimrc.vim file for bindings and other vim stuff
