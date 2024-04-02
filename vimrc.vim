@@ -114,6 +114,9 @@ map <A-0> 10gt
 noremap <Leader>sv :source $MYVIMRC<Cr>
 noremap <Leader>se :edit $MYVIMRC<Cr>
 
+map <F1> :help<Space>
+map <F10> :Lazy<Cr>
+
 packloadall
 colorscheme nightfox
 

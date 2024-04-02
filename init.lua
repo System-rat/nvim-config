@@ -12,9 +12,19 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-
 -- Plugins
 require("lazy").setup({
+  {
+    "rcarriga/nvim-notify",
+    config = function()
+      -- override default notification provider
+      vim.notify = require("notify")
+      vim.notify.setup({
+        stages = "static",
+        renderer = "wrapped-compact"
+      })
+    end
+  },
   {
     "nvim-treesitter/nvim-treesitter",
     priority = 1001,
@@ -108,7 +118,10 @@ require("lazy").setup({
       require('leap').create_default_mappings()
     end,
     dependencies = { "tpope/vim-repeat" }
-  }
+  },
+  {
+    "tpope/vim-fugitive",
+  },
 })
 
 -- Source the vimrc.vim file for bindings and other vim stuff
