@@ -118,6 +118,6 @@ map <F1> :help<Space>
 map <F10> :Lazy<Cr>
 
 packloadall
-colorscheme nightfox
+colorscheme catppuccin
 
 silent! helptags ALL

@@ -113,6 +113,18 @@ require("lazy").setup({
     "EdenEast/nightfox.nvim"
   },
   {
+    "catppuccin/nvim",
+    config = function()
+      require('catppuccin').setup({
+        custom_highlights = function(colors)
+          return {
+            Whitespace = { fg = colors.overlay1 }
+          }
+        end
+      })
+    end
+  },
+  {
     "ggandor/leap.nvim",
     config = function()
       require('leap').create_default_mappings()
@@ -122,10 +134,14 @@ require("lazy").setup({
   {
     "tpope/vim-fugitive",
   },
+  {
+    "numToStr/Comment.nvim",
+    opts = {}
+  },
 })
 
 -- Source the vimrc.vim file for bindings and other vim stuff
 local config_path = vim.fn.stdpath("config") .. "/vimrc.vim";
 if vim.loop.fs_stat(config_path) then
-	vim.cmd("source " .. config_path)
+  vim.cmd("source " .. config_path)
 end

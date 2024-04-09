@@ -1,4 +1,5 @@
 {
+  "Comment.nvim": { "branch": "master", "commit": "0236521ea582747b58869cb72f70ccfa967d2e89" },
   "ale": { "branch": "master", "commit": "6c10a519f1460179cf8f8e329d8eb3186247be2b" },
   "bclose.vim": { "branch": "master", "commit": "99018b4a2dd18aea1cbd3aa23565b01a0f8c5b73" },
   "lazy.nvim": { "branch": "main", "commit": "31ddbea7c10b6920c9077b66c97951ca8682d5c8" },
@@ -6,6 +7,7 @@
   "luarocks.nvim": { "branch": "main", "commit": "d73f4bbbeea9eeb9b66a0c6431db402654f43cb8" },
   "neorg": { "branch": "main", "commit": "27f338f9f6bfad03de7c623173c9cfd24d7e7803" },
   "nightfox.nvim": { "branch": "main", "commit": "e352a32e0f54feb2550ebdab815ae8f7f26ed63b" },
+  "nvim": { "branch": "main", "commit": "02bdd749931a5d739063562e57531c118e081882" },
   "nvim-notify": { "branch": "master", "commit": "5371f4bfc1f6d3adf4fe9d62cd3a9d44356bfd15" },
   "nvim-treesitter": { "branch": "master", "commit": "54cf9180a36299265e217858e6e531245074c3f4" },
   "ranger.vim": { "branch": "master", "commit": "91e82debdf566dfaf47df3aef0a5fd823cedf41c" },
