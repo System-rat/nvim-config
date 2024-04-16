@@ -39,34 +39,98 @@ require("lazy").setup({
          }
       end
   },
+  -- {
+  --   "dense-analysis/ale",
+  --   config = function()
+  --     local g = vim.g
+  --
+  --     g.ale_linters = {
+  --       rust = { "analyzer", "cargo" },
+  --       haskell = "hls",
+  --     }
+  --
+  --     g.ale_fixers = {
+  --       rust = { "rustfmt" },
+  --       cpp = { "clang-format" }
+  --     }
+  --     g.ale_completon_enabled = 1
+  --     g.ale_completion_autoimport = 1
+  --     g.ale_fix_on_save = 1
+  --     g.ale_rust_analyzer_config = {
+  --       cargo = {
+  --         allFeatures = true,
+  --       },
+  --       checkOnSave = {
+  --         allTargets = true
+  --       }
+  --     }
+  --   end
+  -- },
+  -- Needed for neorg
   {
-    "dense-analysis/ale",
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp"
+    },
     config = function()
-      local g = vim.g
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      g.ale_linters = {
-        rust = { "analyzer", "cargo" },
-        haskell = "hls",
-      }
+      local lspconfig = require("lspconfig")
 
-      g.ale_fixers = {
-        rust = { "rustfmt" },
-        cpp = { "clang-format" }
+      local servers = {
+        "clangd",
+        "rust_analyzer"
       }
-      g.ale_completon_enabled = 1
-      g.ale_completion_autoimport = 1
-      g.ale_fix_on_save = 1
-      g.ale_rust_analyzer_config = {
-        cargo = {
-          allFeatures = true,
-        },
-        checkOnSave = {
-          allTargets = true
+      for _, lsp in ipairs(servers) do
+        lspconfig[lsp].setup {
+          capabilities = capabilities,
         }
+      end
+    end
+  },
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "neovim/nvim-lspconfig",
+    },
+    config = function()
+      local cmp = require("cmp")
+      cmp.setup {
+        mapping = cmp.mapping.preset.insert({
+          ['<C-u>'] = cmp.mapping.scroll_docs(-4), -- Up
+          ['<C-d>'] = cmp.mapping.scroll_docs(4), -- Down
+          -- C-b (back) C-f (forward) for snippet placeholder navigation.
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<CR>'] = cmp.mapping.confirm {
+            behavior = cmp.ConfirmBehavior.Replace,
+            select = true,
+          },
+          ['<Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
+          ['<S-Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
+        }),
+        window = {
+          documentation = cmp.config.window.bordered({ zindex = 10 }),
+          completion = cmp.config.window.bordered({ zindex = 5 })
+        },
+        sources = {
+           { name = "nvim_lsp" },
+        },
       }
     end
   },
-  -- Needed for neorg
   {
     "vhyrro/luarocks.nvim",
     priority = 1000,
@@ -74,7 +138,10 @@ require("lazy").setup({
   },
   {
     "nvim-neorg/neorg",
-    dependencies = { "luarocks.nvim" },
+    dependencies = {
+      "luarocks.nvim",
+      "hrsh7th/nvim-cmp",
+    },
     config = function()
       require('neorg').setup {
         load = {
@@ -93,7 +160,12 @@ require("lazy").setup({
               neorg_leader = ','
             }
           },
-          ["core.concealer"] = {}
+          ["core.concealer"] = {},
+          ["core.completion"] = {
+            config = {
+              engine = "nvim-cmp"
+            }
+          }
         }
       }
     end

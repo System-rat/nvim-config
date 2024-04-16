@@ -3,7 +3,7 @@ filetype plugin indent on
 set spell
 set autoread autowrite hidden mouse=a
 set completeopt=menu,menuone,noinsert
-set omnifunc=ale#completion#OmniFunc
+" set omnifunc=ale#completion#OmniFunc
 set sessionoptions-=buffers
 set splitbelow splitright
 set list listchars=tab:›\ ,space:·,trail:· sbr=>>>\
@@ -54,15 +54,6 @@ augroup FileTypeConfig
   autocmd FileType rust setlocal spell
 augroup end
 
-function! CargoFmt()
-  silent! !cargo fmt > /dev/null
-endfunction
-
-augroup RustFmt
-  autocmd!
-  autocmd FileType rust autocmd BufWritePost * call CargoFmt()
-augroup end
-
 " Mappings
 
 let mapleader=","
@@ -73,25 +64,25 @@ inoremap <C-BS> <C-w>
 map <Leader>r :RangerCurrentFile<Cr>
 map <Leader>R :RangerCurrentFileNewTab<Cr>
 
-map <F2> :ALERename<Cr>
-map <Leader>a :ALECodeAction<Cr>
-map <Leader>f :ALEFix<Cr>
-map <Leader>F :ALEOrganizeImports<Cr>
-map <Leader>d :ALEGoToDefinition<Cr>
-map <Leader>dd :ALEGoToDefinition -tab<Cr>
-map <Leader>dt :ALEGoToTypeDefinition<Cr>
-map <Leader>dtt :ALEGoToTypeDefinition -tab<Cr>
-map <Leader>da :ALEFindReferences<Cr>
-map <Leader>daa :ALEFindReferences -tab<Cr>
-map <Leader>g :ALEDetail<Cr>
-imap <Leader>g <C-c>:ALEDetail<Cr>a
-map <Leader>h :ALEHover<Cr>
+" map <F2> :ALERename<Cr>
+" map <Leader>a :ALECodeAction<Cr>
+" map <Leader>f :ALEFix<Cr>
+" map <Leader>F :ALEOrganizeImports<Cr>
+" map <Leader>d :ALEGoToDefinition<Cr>
+" map <Leader>dd :ALEGoToDefinition -tab<Cr>
+" map <Leader>dt :ALEGoToTypeDefinition<Cr>
+" map <Leader>dtt :ALEGoToTypeDefinition -tab<Cr>
+" map <Leader>da :ALEFindReferences<Cr>
+" map <Leader>daa :ALEFindReferences -tab<Cr>
+" map <Leader>g :ALEDetail<Cr>
+" imap <Leader>g <C-c>:ALEDetail<Cr>a
+" map <Leader>h :ALEHover<Cr>
 
-inoremap <C-Space> <C-x><C-o>
-inoremap <expr> <Cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<Cr>"
-inoremap <expr> <Tab> pumvisible() ? "\<C-y>" : "\<C-g>u\<Tab>"
-inoremap <expr> <C-i> pumvisible() ? "\<C-y>" : "\<C-g>u\<C-i>"
-inoremap <expr> <C-[> pumvisible() ? "\<C-e>" : "\<C-g>u\<C-[>"
+" inoremap <C-Space> <C-x><C-o>
+" inoremap <expr> <Cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<Cr>"
+" inoremap <expr> <Tab> pumvisible() ? "\<C-y>" : "\<C-g>u\<Tab>"
+" inoremap <expr> <C-i> pumvisible() ? "\<C-y>" : "\<C-g>u\<C-i>"
+" inoremap <expr> <C-[> pumvisible() ? "\<C-e>" : "\<C-g>u\<C-[>"
 
 map <Leader>. <Esc>
 imap <Leader>. <C-c>
