@@ -1,3 +1,93 @@
+-- Options
+
+vim.cmd.syntax("on")
+vim.cmd.filetype("plugin indent on")
+vim.o.spell = true
+vim.o.autoread = true
+vim.o.autowrite = true
+vim.o.hidden = true
+vim.o.mouse="a"
+vim.o.completeopt = "menu,menuone,noinsert"
+vim.opt.sessionoptions:remove { "buffers" }
+vim.o.splitbelow = true
+vim.o.splitright = true
+vim.o.list = true
+vim.o.listchars = "tab:› ,space:·,trail:·"
+vim.o.sbr=">>>"
+vim.o.tabstop = 2
+vim.o.softtabstop = 0
+vim.o.expandtab = true
+vim.o.shiftwidth = 2
+vim.o.smarttab = true
+vim.o.autoindent = true
+vim.o.wrap = true
+vim.o.linebreak = true
+vim.o.relativenumber = true
+vim.o.timeoutlen = 500
+vim.o.background = "dark"
+vim.o.termguicolors = true
+vim.o.spelllang = "en_us"
+
+vim.w.TrailWSMatch = nil
+vim.cmd.highlight("TrailWS ctermbg=red guibg=red")
+
+function setup_highlight()
+  local twgrp = "TrailWS"
+  local twpat = "\\s\\+$"
+  local twpri = -1
+
+  if vim.w.TrailWSMatch ~= nil then
+    vim.fn.matchdelete(vim.w.TrailWSMatch)
+    vim.fn.matchadd(twgrp, twpat, twpri, vim.w.TrailWSMatch)
+  else
+    vim.w.TrailWSMatch = vim.fn.matchadd(twgrp, twpat, twpri)
+  end
+end
+
+function remove_highlight()
+  if vim.w.TrailWSMatch ~= nil then
+    vim.fn.matchdelete(vim.w.TrailWSMatch)
+    vim.w.TrailWSMatch = nil
+  end
+end
+
+local shgroup = vim.api.nvim_create_augroup("SetupHighlight", { clear = true })
+
+vim.api.nvim_create_autocmd({ "BufNew", "FileType", "BufWinEnter" }, {
+    group = shgroup,
+    callback = function()
+      remove_highlight()
+      if vim.o.ft ~= "" then
+        setup_highlight()
+      end
+    end
+})
+
+vim.api.nvim_create_autocmd({ "TermOpen" }, {
+  group = shgroup,
+  callback = remove_highlight,
+})
+
+-- Base keybindings
+
+vim.g.mapleader = ","
+vim.keymap.set("", "<Leader>w", ":wa<Cr>")
+vim.keymap.set({ "i", "c" }, "<Leader>w", "<C-c>:wa<Cr>")
+vim.keymap.set("i", "<C-BS>", "<C-w>")
+
+-- Tab switching
+for i=1,9 do
+  vim.keymap.set("", "<A-" .. i .. ">", i .. "gt")
+end
+vim.keymap.set("", "<A-0>", "10gt") -- Special case
+
+vim.keymap.set("", "<Leader>.", "<Esc>")
+vim.keymap.set({ "i", "c", "v", "o" }, "<Leader>.", "<C-c>")
+vim.keymap.set("t", "<Leader>.", "<C-\\><C-n>")
+
+vim.keymap.set("", "<F1>", ":help<Space>")
+vim.keymap.set("", "<F10>", ":Lazy<Cr>")
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -30,43 +120,54 @@ require("lazy").setup({
     priority = 1001,
       config = function()
          -- Configure tree-sitter for it to work
-         require('nvim-treesitter.configs').setup {
+        require('nvim-treesitter.configs').setup {
           auto_install = true,
-           highlight = {
-             enable = true,
-             additional_vim_regex_highlighting = false,
-           },
-         }
+          highlight = {
+            enable = true,
+            additional_vim_regex_highlighting = false,
+          },
+          ensure_installed = {
+            "c",
+            "cpp",
+            "rust",
+            "vim",
+            "lua",
+            "vimdoc",
+            "norg",
+            "markdown",
+            "scss",
+            "css",
+            "html",
+            "javascript",
+            "typescript",
+            "cmake",
+            "make",
+            "c_sharp",
+            "csv",
+            "haskell",
+            "ruby",
+            "java",
+            "json",
+            "json5",
+            "julia",
+            "python",
+            "kconfig",
+            "tmux",
+            "yaml",
+            "toml",
+            "ini",
+            "rst",
+            "ssh_config",
+            "sql",
+            "proto",
+            "nix",
+            "latex",
+            "dockerfile",
+            "asm",
+          },
+        }
       end
   },
-  -- {
-  --   "dense-analysis/ale",
-  --   config = function()
-  --     local g = vim.g
-  --
-  --     g.ale_linters = {
-  --       rust = { "analyzer", "cargo" },
-  --       haskell = "hls",
-  --     }
-  --
-  --     g.ale_fixers = {
-  --       rust = { "rustfmt" },
-  --       cpp = { "clang-format" }
-  --     }
-  --     g.ale_completon_enabled = 1
-  --     g.ale_completion_autoimport = 1
-  --     g.ale_fix_on_save = 1
-  --     g.ale_rust_analyzer_config = {
-  --       cargo = {
-  --         allFeatures = true,
-  --       },
-  --       checkOnSave = {
-  --         allTargets = true
-  --       }
-  --     }
-  --   end
-  -- },
-  -- Needed for neorg
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -92,11 +193,23 @@ require("lazy").setup({
     "hrsh7th/nvim-cmp",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
+      "saadparwaiz1/cmp_luasnip",
       "neovim/nvim-lspconfig",
+      "L3MON4D3/LuaSnip",
+      "honza/vim-snippets",
     },
     config = function()
       local cmp = require("cmp")
+      local luasnip = require("luasnip")
+
+      require("luasnip.loaders.from_snipmate").lazy_load()
+
       cmp.setup {
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
         mapping = cmp.mapping.preset.insert({
           ['<C-u>'] = cmp.mapping.scroll_docs(-4), -- Up
           ['<C-d>'] = cmp.mapping.scroll_docs(4), -- Down
@@ -109,6 +222,8 @@ require("lazy").setup({
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
             else
               fallback()
             end
@@ -116,6 +231,8 @@ require("lazy").setup({
           ['<S-Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
             else
               fallback()
             end
@@ -125,8 +242,16 @@ require("lazy").setup({
           documentation = cmp.config.window.bordered({ zindex = 10 }),
           completion = cmp.config.window.bordered({ zindex = 5 })
         },
+        formatting = {
+          format = function(entry, vim_item)
+            -- Prevent the giant-ass menu from appearing
+            vim_item.menu = nil
+            return vim_item
+          end
+        },
         sources = {
            { name = "nvim_lsp" },
+           { name = "luasnip" },
         },
       }
     end
@@ -179,6 +304,9 @@ require("lazy").setup({
       local g = vim.g
       g.ranger_replace_netrw = 1
       g.ranger_map_keys = 0
+
+      vim.keymap.set("", "<Leader>r", ":RangerCurrentFile<Cr>")
+      vim.keymap.set("", "<Leader>R", ":RangerCurrentFileNewTab<Cr>")
     end
   },
   {
@@ -211,6 +339,11 @@ require("lazy").setup({
     opts = {}
   },
 })
+
+-- Options to load after plugins
+
+vim.cmd.colorscheme("catppuccin")
+vim.cmd.helptags { "ALL", mods = { silent = true } }
 
 -- Source the vimrc.vim file for bindings and other vim stuff
 local config_path = vim.fn.stdpath("config") .. "/vimrc.vim";
