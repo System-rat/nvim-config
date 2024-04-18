@@ -56,7 +56,7 @@ vim.api.nvim_create_autocmd({ "BufNew", "FileType", "BufWinEnter" }, {
     group = shgroup,
     callback = function()
       remove_highlight()
-      if vim.o.ft ~= "" then
+      if vim.o.ft ~= "" and vim.o.modifiable == true then
         setup_highlight()
       end
     end
@@ -64,7 +64,10 @@ vim.api.nvim_create_autocmd({ "BufNew", "FileType", "BufWinEnter" }, {
 
 vim.api.nvim_create_autocmd({ "TermOpen" }, {
   group = shgroup,
-  callback = remove_highlight,
+  callback = function()
+    remove_highlight()
+    vim.wo.spell = false
+  end
 })
 
 -- Base keybindings
@@ -85,7 +88,11 @@ vim.keymap.set({ "i", "c", "v", "o" }, "<Leader>.", "<C-c>")
 vim.keymap.set("t", "<Leader>.", "<C-\\><C-n>")
 
 vim.keymap.set("", "<F1>", ":help<Space>")
-vim.keymap.set("", "<F10>", ":Lazy<Cr>")
+-- Lazy doesn't trigger buffer events
+vim.keymap.set("", "<F10>", function()
+  vim.cmd.Lazy()
+  remove_highlight()
+end)
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -186,6 +193,14 @@ require("lazy").setup({
           capabilities = capabilities,
         }
       end
+
+      vim.keymap.set("", "<Leader>h", vim.lsp.buf.hover)
+      vim.keymap.set("", "<F2>", vim.lsp.buf.rename)
+      vim.keymap.set("", "<Leader>f", vim.lsp.buf.format)
+      vim.keymap.set("", "<Leader>a", vim.lsp.buf.code_action)
+      vim.keymap.set({ "n", "i" }, "<Leader>g", function()
+        vim.diagnostic.open_float(nil, { focus = false })
+      end)
     end
   },
   {
@@ -299,11 +314,12 @@ require("lazy").setup({
   },
   {
     "francoiscabrol/ranger.vim",
-    config = function()
+    init = function()
       local g = vim.g
       g.ranger_replace_netrw = 1
       g.ranger_map_keys = 0
-
+    end,
+    config = function()
       vim.keymap.set("", "<Leader>r", ":RangerCurrentFile<Cr>")
       vim.keymap.set("", "<Leader>R", ":RangerCurrentFileNewTab<Cr>")
     end
@@ -337,6 +353,74 @@ require("lazy").setup({
     "numToStr/Comment.nvim",
     opts = {}
   },
+  {
+    "nvim-telescope/telescope-fzf-native.nvim",
+    build = "make"
+  },
+  {
+    "nvim-telescope/telescope.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope-fzf-native.nvim",
+    },
+    config = function()
+      local tele = require("telescope")
+
+      tele.setup({
+        extensions = {
+          fzf = {
+            fuzzy = true,
+            override_generic_sorter = true,
+            override_file_sorter = true,
+            case_mode = "smart_case"
+          }
+        }
+      })
+
+      tele.load_extension("fzf")
+
+
+      local builtins = require('telescope.builtin')
+
+      -- Replace with the better telescope search
+      vim.keymap.del("", "<F1>")
+      vim.keymap.set("", "<F1>", builtins.help_tags)
+
+      vim.keymap.set("", "<Leader>d", function()
+        builtins.lsp_definitions()
+      end)
+
+      vim.keymap.set("", "<Leader>dd", function()
+        builtins.lsp_definitions({ jump_type = "tab" })
+      end)
+
+      vim.keymap.set("", "<Leader>dt", function()
+        builtins.lsp_type_definitions()
+      end)
+
+      vim.keymap.set("", "<Leader>dtt", function()
+        builtins.lsp_type_definitions({ jump_type = "tab" })
+      end)
+
+      vim.keymap.set("", "<Leader>di", function()
+        builtins.lsp_implementations()
+      end)
+
+      vim.keymap.set("", "<Leader>dii", function()
+        builtins.lsp_implementations({ jump_type = "tab" })
+      end)
+
+      vim.keymap.set("", "<Leader>da", function()
+        builtins.lsp_references()
+      end)
+
+      vim.keymap.set("", "<Leader>daa", function()
+        builtins.lsp_references({ jump_type = "tab" })
+      end)
+
+      vim.keymap.set("", "<Leader>/", builtins.live_grep)
+    end
+  }
 })
 
 -- Options to load after plugins
@@ -344,8 +428,3 @@ require("lazy").setup({
 vim.cmd.colorscheme("catppuccin")
 vim.cmd.helptags { "ALL", mods = { silent = true } }
 
--- Source the vimrc.vim file for bindings and other vim stuff
-local config_path = vim.fn.stdpath("config") .. "/vimrc.vim";
-if vim.loop.fs_stat(config_path) then
-  vim.cmd("source " .. config_path)
-end
