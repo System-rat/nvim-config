@@ -88,11 +88,6 @@ vim.keymap.set({ "i", "c", "v", "o" }, "<Leader>.", "<C-c>")
 vim.keymap.set("t", "<Leader>.", "<C-\\><C-n>")
 
 vim.keymap.set("", "<F1>", ":help<Space>")
--- Lazy doesn't trigger buffer events
-vim.keymap.set("", "<F10>", function()
-  vim.cmd.Lazy()
-  remove_highlight()
-end)
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -375,7 +370,16 @@ require("lazy").setup({
     dependencies = { "tpope/vim-repeat" }
   },
   {
-    "tpope/vim-fugitive",
+    "NeogitOrg/neogit",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim",
+    },
+    config = function()
+      local neogit = require("neogit")
+
+      neogit.setup({})
+    end
   },
   {
     "numToStr/Comment.nvim",
@@ -449,6 +453,19 @@ require("lazy").setup({
     end
   }
 })
+
+-- Lazy doesn't trigger buffer events
+-- and it doesn't toggle so just add the
+-- functionality to do it here.
+local lv = require("lazy.view")
+vim.keymap.set("", "<F10>", function()
+  if lv.visible() then
+    lv.view:close()
+  else
+    lv.show("home")
+    remove_highlight()
+  end
+end)
 
 -- Options to load after plugins
 
