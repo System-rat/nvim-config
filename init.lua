@@ -30,7 +30,7 @@ vim.o.spelllang = "en_us"
 vim.w.TrailWSMatch = nil
 vim.cmd.highlight("TrailWS ctermbg=red guibg=red")
 
-function setup_highlight()
+local function setup_highlight()
   local twgrp = "TrailWS"
   local twpat = "\\s\\+$"
   local twpri = -1
@@ -43,7 +43,7 @@ function setup_highlight()
   end
 end
 
-function remove_highlight()
+local function remove_highlight()
   if vim.w.TrailWSMatch ~= nil then
     vim.fn.matchdelete(vim.w.TrailWSMatch)
     vim.w.TrailWSMatch = nil
@@ -126,6 +126,7 @@ require("lazy").setup({
     priority = 1001,
       config = function()
          -- Configure tree-sitter for it to work
+---@diagnostic disable-next-line: missing-fields
         require('nvim-treesitter.configs').setup {
           auto_install = true,
           highlight = {
@@ -186,13 +187,39 @@ require("lazy").setup({
 
       local servers = {
         "clangd",
-        "rust_analyzer"
+        "rust_analyzer",
       }
       for _, lsp in ipairs(servers) do
         lspconfig[lsp].setup {
           capabilities = capabilities,
         }
       end
+
+      -- Configure Lua for Neovim
+      lspconfig["lua_ls"].setup {
+        on_init = function (client)
+          local path = client.workspace_folders[1].name
+          if vim.loop.fs_stat(path..'/.luarc.json') or vim.loop.fs_stat(path..'/.luarc.jsonc') then
+            return
+          end
+
+          client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+            runtime = {
+              version  = "LuaJIT"
+            },
+            workspace = {
+              checkThirdParty = false,
+              -- library = {
+              --   vim.env.VIMRUNTIME
+              -- }
+              library = vim.api.nvim_get_runtime_file("", true)
+            }
+          })
+        end,
+        settings = {
+          Lua = {}
+        }
+      }
 
       vim.keymap.set("", "<Leader>h", vim.lsp.buf.hover)
       vim.keymap.set("", "<F2>", vim.lsp.buf.rename)
@@ -257,7 +284,7 @@ require("lazy").setup({
           completion = cmp.config.window.bordered({ zindex = 5 })
         },
         formatting = {
-          format = function(entry, vim_item)
+          format = function(_, vim_item)
             -- Prevent the giant-ass menu from appearing
             vim_item.menu = nil
             return vim_item
@@ -333,9 +360,10 @@ require("lazy").setup({
       require('catppuccin').setup({
         custom_highlights = function(colors)
           return {
-            Whitespace = { fg = colors.overlay1 }
+            Whitespace = { fg = colors.overlay1 },
+            LeapBackdrop = { fg = colors.overlay0 },
           }
-        end
+        end,
       })
     end
   },
@@ -378,7 +406,6 @@ require("lazy").setup({
       })
 
       tele.load_extension("fzf")
-
 
       local builtins = require('telescope.builtin')
 
