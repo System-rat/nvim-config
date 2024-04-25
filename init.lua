@@ -168,6 +168,10 @@ require("lazy").setup({
             "asm",
           },
         }
+
+        vim.o.foldmethod = "expr"
+        vim.o.foldexpr = "nvim_treesitter#foldexpr()"
+        vim.o.foldenable = false
       end
   },
   {
@@ -288,6 +292,7 @@ require("lazy").setup({
         sources = {
            { name = "nvim_lsp" },
            { name = "luasnip" },
+           { name = "neorg" },
         },
       }
     end
