@@ -5,14 +5,14 @@ vim.o.spell = true
 vim.o.autoread = true
 vim.o.autowrite = true
 vim.o.hidden = true
-vim.o.mouse="a"
+vim.o.mouse = "a"
 vim.o.completeopt = "menu,menuone,noinsert"
 vim.opt.sessionoptions:remove { "buffers" }
 vim.o.splitbelow = true
 vim.o.splitright = true
 vim.o.list = true
 vim.o.listchars = "tab:› ,space:·,trail:·"
-vim.o.sbr=">>>"
+vim.o.sbr = ">>>"
 vim.o.tabstop = 2
 vim.o.softtabstop = 0
 vim.o.expandtab = true
@@ -26,6 +26,7 @@ vim.o.timeoutlen = 500
 vim.o.background = "dark"
 vim.o.termguicolors = true
 vim.o.spelllang = "en_us"
+vim.o.updatetime = 500
 
 vim.w.TrailWSMatch = nil
 vim.cmd.highlight("TrailWS ctermbg=red guibg=red")
@@ -53,13 +54,13 @@ end
 local shgroup = vim.api.nvim_create_augroup("SetupHighlight", { clear = true })
 
 vim.api.nvim_create_autocmd({ "BufNew", "FileType", "BufWinEnter" }, {
-    group = shgroup,
-    callback = function()
-      remove_highlight()
-      if vim.o.ft ~= "" and vim.o.modifiable == true then
-        setup_highlight()
-      end
+  group = shgroup,
+  callback = function()
+    remove_highlight()
+    if vim.o.ft ~= "" and vim.o.modifiable == true then
+      setup_highlight()
     end
+  end
 })
 
 vim.api.nvim_create_autocmd({ "TermOpen" }, {
@@ -78,7 +79,7 @@ vim.keymap.set({ "i", "c" }, "<Leader>w", "<C-c>:wa<Cr>")
 vim.keymap.set("i", "<C-BS>", "<C-w>")
 
 -- Tab switching
-for i=1,9 do
+for i = 1, 9 do
   vim.keymap.set("", "<A-" .. i .. ">", i .. "gt")
 end
 vim.keymap.set("", "<A-0>", "10gt") -- Special case
@@ -119,60 +120,60 @@ require("lazy").setup({
   {
     "nvim-treesitter/nvim-treesitter",
     priority = 1001,
-      config = function()
-         -- Configure tree-sitter for it to work
----@diagnostic disable-next-line: missing-fields
-        require('nvim-treesitter.configs').setup {
-          auto_install = true,
-          highlight = {
-            enable = true,
-            additional_vim_regex_highlighting = false,
-          },
-          ensure_installed = {
-            "c",
-            "cpp",
-            "rust",
-            "vim",
-            "lua",
-            "vimdoc",
-            "norg",
-            "markdown",
-            "scss",
-            "css",
-            "html",
-            "javascript",
-            "typescript",
-            "cmake",
-            "make",
-            "c_sharp",
-            "csv",
-            "haskell",
-            "ruby",
-            "java",
-            "json",
-            "json5",
-            "julia",
-            "python",
-            "kconfig",
-            "tmux",
-            "yaml",
-            "toml",
-            "ini",
-            "rst",
-            "ssh_config",
-            "sql",
-            "proto",
-            "nix",
-            "latex",
-            "dockerfile",
-            "asm",
-          },
-        }
+    config = function()
+      -- Configure tree-sitter for it to work
+      ---@diagnostic disable-next-line: missing-fields
+      require('nvim-treesitter.configs').setup {
+        auto_install = true,
+        highlight = {
+          enable = true,
+          additional_vim_regex_highlighting = false,
+        },
+        ensure_installed = {
+          "c",
+          "cpp",
+          "rust",
+          "vim",
+          "lua",
+          "vimdoc",
+          "norg",
+          "markdown",
+          "scss",
+          "css",
+          "html",
+          "javascript",
+          "typescript",
+          "cmake",
+          "make",
+          "c_sharp",
+          "csv",
+          "haskell",
+          "ruby",
+          "java",
+          "json",
+          "json5",
+          "julia",
+          "python",
+          "kconfig",
+          "tmux",
+          "yaml",
+          "toml",
+          "ini",
+          "rst",
+          "ssh_config",
+          "sql",
+          "proto",
+          "nix",
+          "latex",
+          "dockerfile",
+          "asm",
+        },
+      }
 
-        vim.o.foldmethod = "expr"
-        vim.o.foldexpr = "nvim_treesitter#foldexpr()"
-        vim.o.foldenable = false
-      end
+      vim.o.foldmethod = "expr"
+      vim.o.foldexpr = "nvim_treesitter#foldexpr()"
+      vim.o.foldenable = false
+    end
   },
   {
     "neovim/nvim-lspconfig",
@@ -196,15 +197,15 @@ require("lazy").setup({
 
       -- Configure Lua for Neovim
       lspconfig["lua_ls"].setup {
-        on_init = function (client)
+        on_init = function(client)
           local path = client.workspace_folders[1].name
-          if vim.loop.fs_stat(path..'/.luarc.json') or vim.loop.fs_stat(path..'/.luarc.jsonc') then
+          if vim.loop.fs_stat(path .. '/.luarc.json') or vim.loop.fs_stat(path .. '/.luarc.jsonc') then
             return
           end
 
           client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
             runtime = {
-              version  = "LuaJIT"
+              version = "LuaJIT"
             },
             workspace = {
               checkThirdParty = false,
@@ -227,6 +228,24 @@ require("lazy").setup({
       vim.keymap.set({ "n", "i" }, "<Leader>g", function()
         vim.diagnostic.open_float(nil, { focus = false })
       end)
+
+      local hover_group = vim.api.nvim_create_augroup("HoverLSP", {})
+      vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+        group = hover_group,
+        callback = function()
+          -- Fix issue with calling hover being overridden  by the cursor hold
+          local wins = vim.api.nvim_list_wins()
+          local is_hover_active = false
+          for _, win in ipairs(wins) do
+            if vim.api.nvim_win_call(win, function() return vim.w["textDocument/hover"] == 1 end) then
+              is_hover_active = true
+            end
+          end
+          if not is_hover_active then
+            vim.diagnostic.open_float(nil, { focus = false })
+          end
+        end
+      })
     end
   },
   {
@@ -252,7 +271,7 @@ require("lazy").setup({
         },
         mapping = cmp.mapping.preset.insert({
           ['<C-u>'] = cmp.mapping.scroll_docs(-4), -- Up
-          ['<C-d>'] = cmp.mapping.scroll_docs(4), -- Down
+          ['<C-d>'] = cmp.mapping.scroll_docs(4),  -- Down
           -- C-b (back) C-f (forward) for snippet placeholder navigation.
           ['<C-Space>'] = cmp.mapping.complete(),
           ['<CR>'] = cmp.mapping.confirm {
@@ -290,9 +309,9 @@ require("lazy").setup({
           end
         },
         sources = {
-           { name = "nvim_lsp" },
-           { name = "luasnip" },
-           { name = "neorg" },
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+          { name = "neorg" },
         },
       }
     end
@@ -331,7 +350,8 @@ require("lazy").setup({
             config = {
               engine = "nvim-cmp"
             }
-          }
+          },
+          -- ["core.ui.calendar"] = {},
         }
       }
     end
@@ -385,6 +405,9 @@ require("lazy").setup({
 
       neogit.setup({})
     end
+  },
+  {
+    "tpope/vim-fugitive"
   },
   {
     "numToStr/Comment.nvim",
@@ -476,4 +499,3 @@ end)
 
 vim.cmd.colorscheme("catppuccin")
 vim.cmd.helptags { "ALL", mods = { silent = true } }
-
