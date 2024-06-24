@@ -372,7 +372,17 @@ require("lazy").setup({
     end
   },
   {
-    "EdenEast/nightfox.nvim"
+    "EdenEast/nightfox.nvim",
+    config = function()
+      local nf = require("nightfox")
+      nf.setup({
+        groups = {
+          all = {
+            Whitespace = { fg = "palette.fg1" }
+          }
+        }
+      })
+    end
   },
   {
     "catppuccin/nvim",
@@ -434,6 +444,9 @@ require("lazy").setup({
             override_file_sorter = true,
             case_mode = "smart_case"
           }
+        },
+        defaults = {
+          layout_strategy = 'vertical'
         }
       })
 
@@ -497,5 +510,5 @@ end)
 
 -- Options to load after plugins
 
-vim.cmd.colorscheme("catppuccin")
+vim.cmd.colorscheme("carbonfox")
 vim.cmd.helptags { "ALL", mods = { silent = true } }
