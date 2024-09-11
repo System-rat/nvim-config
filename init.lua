@@ -53,11 +53,11 @@ end
 
 local shgroup = vim.api.nvim_create_augroup("SetupHighlight", { clear = true })
 
-vim.api.nvim_create_autocmd({ "BufNew", "FileType", "BufWinEnter" }, {
+vim.api.nvim_create_autocmd({ "BufWinEnter", "WinNew", "BufNew", "BufModifiedSet" }, {
   group = shgroup,
   callback = function()
     remove_highlight()
-    if vim.o.ft ~= "" and vim.o.modifiable == true then
+    if vim.o.modifiable == true then
       setup_highlight()
     end
   end
@@ -195,6 +195,12 @@ require("lazy").setup({
         }
       end
 
+      lspconfig["jdtls"].setup {
+        cmd = { "jdt-language-server", "-configuration", vim.env.HOME .. "/.cache/jdtls/config", "-data",
+          vim.env.HOME .. "/.cache/jdtls/workspace" },
+        capabilities = capabilities
+      }
+
       -- Configure Lua for Neovim
       lspconfig["lua_ls"].setup {
         on_init = function(client)
@@ -237,7 +243,7 @@ require("lazy").setup({
           local wins = vim.api.nvim_list_wins()
           local is_hover_active = false
           for _, win in ipairs(wins) do
-            if vim.api.nvim_win_call(win, function() return vim.w["textDocument/hover"] == 1 end) then
+            if vim.api.nvim_win_call(win, function() return vim.w["textDocument/hover"] ~= nil end) then
               is_hover_active = true
             end
           end
@@ -246,6 +252,22 @@ require("lazy").setup({
           end
         end
       })
+    end
+  },
+  {
+    "Julian/lean.nvim",
+    event = { 'BufReadPre *.lean', 'BufNewFile *.lean' },
+    dependencies = {
+      "neovim/nvim-lspconfig",
+      "nvim-lua/plenary.nvim"
+    },
+    otps = {
+      lsp = {},
+      abbreviations = { enable = true }
+    },
+    config = function()
+      local lean = require("lean")
+      lean.setup {}
     end
   },
   {
@@ -403,18 +425,6 @@ require("lazy").setup({
       require('leap').create_default_mappings()
     end,
     dependencies = { "tpope/vim-repeat" }
-  },
-  {
-    "NeogitOrg/neogit",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim",
-    },
-    config = function()
-      local neogit = require("neogit")
-
-      neogit.setup({})
-    end
   },
   {
     "tpope/vim-fugitive"
