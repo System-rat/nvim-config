@@ -27,6 +27,9 @@ vim.o.background = "dark"
 vim.o.termguicolors = true
 vim.o.spelllang = "en_us"
 vim.o.updatetime = 500
+vim.o.cc = "120"
+vim.o.title = true
+vim.o.titlestring = "NVIM%y %f[%L]%r%m"
 
 vim.w.TrailWSMatch = nil
 vim.cmd.highlight("TrailWS ctermbg=red guibg=red")
@@ -172,7 +175,8 @@ require("lazy").setup({
 
       vim.o.foldmethod = "expr"
       vim.o.foldexpr = "nvim_treesitter#foldexpr()"
-      vim.o.foldenable = false
+      vim.o.foldenable = true
+      vim.o.foldlevel = 999;
     end
   },
   {
@@ -188,21 +192,30 @@ require("lazy").setup({
       local servers = {
         "clangd",
         "rust_analyzer",
+        "nixd",
       }
       for _, lsp in ipairs(servers) do
         lspconfig[lsp].setup {
           capabilities = capabilities,
+          on_attach = function() vim.lsp.inlay_hint.enable(true) end
         }
       end
 
       lspconfig["jdtls"].setup {
         cmd = { "jdt-language-server", "-configuration", vim.env.HOME .. "/.cache/jdtls/config", "-data",
           vim.env.HOME .. "/.cache/jdtls/workspace" },
-        capabilities = capabilities
+        capabilities = capabilities,
+        on_attach = function() vim.lsp.inlay_hint.enable(true) end
+      }
+
+      lspconfig["omnisharp"].setup {
+        cmd = { "dotnet", vim.env.HOME .. "/.local/share/omnisharp/OmniSharp.dll" },
+        on_attach = function() vim.lsp.inlay_hint.enable(true) end
       }
 
       -- Configure Lua for Neovim
       lspconfig["lua_ls"].setup {
+        on_attach = function() vim.lsp.inlay_hint.enable(true) end,
         on_init = function(client)
           local path = client.workspace_folders[1].name
           if vim.loop.fs_stat(path .. '/.luarc.json') or vim.loop.fs_stat(path .. '/.luarc.jsonc') then
@@ -520,5 +533,5 @@ end)
 
 -- Options to load after plugins
 
-vim.cmd.colorscheme("carbonfox")
+vim.cmd.colorscheme("catppuccin")
 vim.cmd.helptags { "ALL", mods = { silent = true } }
