@@ -29,10 +29,49 @@ vim.o.spelllang = "en_us"
 vim.o.updatetime = 500
 vim.o.cc = "120"
 vim.o.title = true
-vim.o.titlestring = "NVIM%y %f[%L]%r%m"
+vim.o.titlestring = "nvim%y %f[%L]%r%m"
 
 vim.w.TrailWSMatch = nil
 vim.cmd.highlight("TrailWS ctermbg=red guibg=red")
+
+function To_camel_case()
+  local to_remove = {
+    "%.",
+    ",",
+    "@",
+    "%|",
+    "%/",
+    "%\\",
+    "%(",
+    "%)",
+    "%[",
+    "%]",
+    "%{",
+    "%}",
+    "%<",
+    "%>"
+  }
+  local str = vim.fn.getreg("0")
+  local words = {}
+
+  for _, c in pairs(to_remove) do
+    str = string.gsub(str, c, "")
+  end
+
+  for w in string.gmatch(str, "%a+") do
+    table.insert(words, w)
+  end
+
+  words[1] = string.lower(words[1])
+
+  for i, w in ipairs(words) do
+    if i ~= 1 then
+      words[i] = string.gsub(w, "^%l", string.upper)
+    end
+  end
+
+  return table.concat(words, "")
+end
 
 local function setup_highlight()
   local twgrp = "TrailWS"
@@ -71,6 +110,17 @@ vim.api.nvim_create_autocmd({ "TermOpen" }, {
   callback = function()
     remove_highlight()
     vim.wo.spell = false
+  end
+})
+
+local ft_groups = vim.api.nvim_create_augroup("FileTypes", { clear = true })
+
+
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  group = ft_groups,
+  pattern = "*.cs",
+  callback = function ()
+    vim.bo.sw = 4
   end
 })
 
