@@ -115,6 +115,13 @@ vim.api.nvim_create_autocmd({ "TermOpen" }, {
 
 local ft_groups = vim.api.nvim_create_augroup("FileTypes", { clear = true })
 
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  group = ft_groups,
+  pattern = "*.scons",
+  callback = function()
+    vim.o.ft = "python"
+  end
+})
 
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
   group = ft_groups,
@@ -237,34 +244,34 @@ require("lazy").setup({
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local lspconfig = require("lspconfig")
-
       local servers = {
         "clangd",
         "rust_analyzer",
         "nixd",
+        "pylyzer",
+        "ruby_lsp",
       }
       for _, lsp in ipairs(servers) do
-        lspconfig[lsp].setup {
+        vim.lsp.config(lsp, {
           capabilities = capabilities,
           on_attach = function() vim.lsp.inlay_hint.enable(true) end
-        }
+        })
       end
 
-      lspconfig["jdtls"].setup {
+      vim.lsp.config("jdtls", {
         cmd = { "jdt-language-server", "-configuration", vim.env.HOME .. "/.cache/jdtls/config", "-data",
           vim.env.HOME .. "/.cache/jdtls/workspace" },
         capabilities = capabilities,
         on_attach = function() vim.lsp.inlay_hint.enable(true) end
-      }
+      })
 
-      lspconfig["omnisharp"].setup {
+      vim.lsp.config("omnisharp", {
         cmd = { "dotnet", vim.env.HOME .. "/.local/share/omnisharp/OmniSharp.dll" },
         on_attach = function() vim.lsp.inlay_hint.enable(true) end
-      }
+      })
 
       -- Configure Lua for Neovim
-      lspconfig["lua_ls"].setup {
+      vim.lsp.config("lua_ls", {
         on_attach = function() vim.lsp.inlay_hint.enable(true) end,
         on_init = function(client)
           local path = client.workspace_folders[1].name
@@ -288,7 +295,7 @@ require("lazy").setup({
         settings = {
           Lua = {}
         }
-      }
+      })
 
       vim.keymap.set("", "<Leader>h", vim.lsp.buf.hover)
       vim.keymap.set("", "<F2>", vim.lsp.buf.rename)
@@ -297,24 +304,6 @@ require("lazy").setup({
       vim.keymap.set({ "n", "i" }, "<Leader>g", function()
         vim.diagnostic.open_float(nil, { focus = false })
       end)
-
-      local hover_group = vim.api.nvim_create_augroup("HoverLSP", {})
-      vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-        group = hover_group,
-        callback = function()
-          -- Fix issue with calling hover being overridden  by the cursor hold
-          local wins = vim.api.nvim_list_wins()
-          local is_hover_active = false
-          for _, win in ipairs(wins) do
-            if vim.api.nvim_win_call(win, function() return vim.w["textDocument/hover"] ~= nil end) then
-              is_hover_active = true
-            end
-          end
-          if not is_hover_active then
-            vim.diagnostic.open_float(nil, { focus = false })
-          end
-        end
-      })
     end
   },
   {
@@ -485,7 +474,9 @@ require("lazy").setup({
   {
     "ggandor/leap.nvim",
     config = function()
-      require('leap').create_default_mappings()
+      vim.keymap.set({'n', 'x', 'o'}, 's',  '<Plug>(leap-forward)')
+      vim.keymap.set({'n', 'x', 'o'}, 'S',  '<Plug>(leap-backward)')
+      vim.keymap.set('n',             'gs', '<Plug>(leap-from-window)')
     end,
     dependencies = { "tpope/vim-repeat" }
   },
