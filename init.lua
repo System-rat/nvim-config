@@ -256,6 +256,7 @@ require("lazy").setup({
           capabilities = capabilities,
           on_attach = function() vim.lsp.inlay_hint.enable(true) end
         })
+        vim.lsp.enable(lsp)
       end
 
       vim.lsp.config("jdtls", {
@@ -264,11 +265,13 @@ require("lazy").setup({
         capabilities = capabilities,
         on_attach = function() vim.lsp.inlay_hint.enable(true) end
       })
+      vim.lsp.enable("jdtl")
 
       vim.lsp.config("omnisharp", {
         cmd = { "dotnet", vim.env.HOME .. "/.local/share/omnisharp/OmniSharp.dll" },
         on_attach = function() vim.lsp.inlay_hint.enable(true) end
       })
+      vim.lsp.enable("omnisharp")
 
       -- Configure Lua for Neovim
       vim.lsp.config("lua_ls", {
@@ -296,6 +299,7 @@ require("lazy").setup({
           Lua = {}
         }
       })
+      vim.lsp.enable("lua_ls")
 
       vim.keymap.set("", "<Leader>h", vim.lsp.buf.hover)
       vim.keymap.set("", "<F2>", vim.lsp.buf.rename)
@@ -394,41 +398,6 @@ require("lazy").setup({
     "vhyrro/luarocks.nvim",
     priority = 1000,
     config = true,
-  },
-  {
-    "nvim-neorg/neorg",
-    dependencies = {
-      "luarocks.nvim",
-      "hrsh7th/nvim-cmp",
-    },
-    config = function()
-      require('neorg').setup {
-        load = {
-          ["core.defaults"] = {},
-          ["core.dirman"] = {
-            config = {
-              workspaces = {
-                work = "~/Notes/Work",
-                home = "~/Notes/Home",
-              }
-            }
-          },
-          ["core.keybinds"] = {
-            config = {
-              default_keybinds = true,
-              neorg_leader = ','
-            }
-          },
-          ["core.concealer"] = {},
-          ["core.completion"] = {
-            config = {
-              engine = "nvim-cmp"
-            }
-          },
-          -- ["core.ui.calendar"] = {},
-        }
-      }
-    end
   },
   {
     "rbgrouleff/bclose.vim"
